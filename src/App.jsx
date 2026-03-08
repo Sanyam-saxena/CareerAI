@@ -465,105 +465,115 @@ Return ONLY valid JSON:
     // ── Render ────────────────────────────────────────────────────────────────
     return (
         <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text)", transition: "all 0.3s" }}>
-            {/* Nav */}
-            <nav style={{
-                position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-                borderBottom: "1px solid var(--border)",
-                background: "var(--surface)", padding: "0 24px", height: "60px",
-                display: "flex", alignItems: "center", justifyContent: "space-between"
-            }}>
-                <button onClick={() => setPage("landing")} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 8, background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <span style={{ color: "white", fontSize: 14, fontWeight: 700 }}>C</span>
-                    </div>
-                    <span className="font-display" style={{ fontSize: 16, fontWeight: 600, color: "var(--text)" }}>CareerAI</span>
-                </button>
+            {/* Animated Background */}
+            <div className="app-bg">
+                <div className="bg-orb bg-orb-1" />
+                <div className="bg-orb bg-orb-2" />
+                <div className="bg-orb bg-orb-3" />
+            </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    {(page === "landing" || page === "history") && (
-                        <button className="btn-ghost" style={{ fontSize: 13, padding: "7px 14px" }} onClick={() => setPage(page === "history" ? "landing" : "history")}>
-                            {page === "history" ? "← Home" : `📋 History${savedSessions.length > 0 ? ` (${savedSessions.length})` : ""}`}
+            {/* App Content */}
+            <div className="app-content">
+                {/* Nav */}
+                <nav style={{
+                    position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+                    borderBottom: "1px solid var(--border)",
+                    background: "var(--surface)", padding: "0 24px", height: "60px",
+                    display: "flex", alignItems: "center", justifyContent: "space-between"
+                }}>
+                    <button onClick={() => setPage("landing")} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div style={{ width: 28, height: 28, borderRadius: 8, background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <span style={{ color: "white", fontSize: 14, fontWeight: 700 }}>C</span>
+                        </div>
+                        <span className="font-display brand-text" style={{ fontSize: 16, fontWeight: 600, color: "var(--text)" }}>CareerAI</span>
+                    </button>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        {(page === "landing" || page === "history") && (
+                            <button className="btn-ghost" style={{ fontSize: 13, padding: "7px 14px" }} onClick={() => setPage(page === "history" ? "landing" : "history")}>
+                                {page === "history" ? "← Home" : `📋 History${savedSessions.length > 0 ? ` (${savedSessions.length})` : ""}`}
+                            </button>
+                        )}
+                        {page === "results" && results && (
+                            <>
+                                <button className="btn-ghost" style={{ fontSize: 13, padding: "7px 14px" }} onClick={() => { setActiveRoadmapCareer(0); setPage("roadmap"); }}>
+                                    Roadmap
+                                </button>
+                                <button
+                                    className="btn-ghost"
+                                    style={{ fontSize: 13, padding: "7px 14px", ...(selectedForCompare.length === 2 ? { background: "var(--accent-bg)", color: "var(--accent)", borderColor: "transparent" } : {}) }}
+                                    onClick={handleCompare}
+                                    disabled={selectedForCompare.length !== 2}
+                                >
+                                    {selectedForCompare.length === 2 ? "Compare Selected →" : `Compare (${selectedForCompare.length}/2)`}
+                                </button>
+                            </>
+                        )}
+                        {(page === "compare" || page === "roadmap") && (
+                            <button className="btn-ghost" style={{ fontSize: 13, padding: "7px 14px" }} onClick={() => setPage("results")}>← Back to Results</button>
+                        )}
+                        <button
+                            onClick={() => setDark(!dark)}
+                            style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: 8, padding: "6px 10px", cursor: "pointer", fontSize: 16, color: "var(--text)" }}
+                            title="Toggle dark mode"
+                        >
+                            {dark ? "☀️" : "🌙"}
                         </button>
+                    </div>
+                </nav>
+
+                <div style={{ paddingTop: 60 }}>
+                    {page === "landing" && <LandingPage onStart={startAssessment} onHistory={() => setPage("history")} historyCount={savedSessions.length} />}
+                    {page === "history" && (
+                        <HistoryPage
+                            sessions={savedSessions}
+                            onLoad={loadSession}
+                            onDelete={deleteSession}
+                            onNewAssessment={startAssessment}
+                        />
+                    )}
+                    {page === "chat" && (
+                        <ChatPage
+                            messages={chatMessages}
+                            typing={aiTyping}
+                            inputVal={inputVal}
+                            setInputVal={setInputVal}
+                            onSend={handleSend}
+                            currentQ={currentQ}
+                            chatEndRef={chatEndRef}
+                            error={error}
+                            onRetry={handleRetry}
+                        />
                     )}
                     {page === "results" && results && (
-                        <>
-                            <button className="btn-ghost" style={{ fontSize: 13, padding: "7px 14px" }} onClick={() => { setActiveRoadmapCareer(0); setPage("roadmap"); }}>
-                                Roadmap
-                            </button>
-                            <button
-                                className="btn-ghost"
-                                style={{ fontSize: 13, padding: "7px 14px", ...(selectedForCompare.length === 2 ? { background: "var(--accent-bg)", color: "var(--accent)", borderColor: "transparent" } : {}) }}
-                                onClick={handleCompare}
-                                disabled={selectedForCompare.length !== 2}
-                            >
-                                {selectedForCompare.length === 2 ? "Compare Selected →" : `Compare (${selectedForCompare.length}/2)`}
-                            </button>
-                        </>
+                        <ResultsPage
+                            results={results}
+                            selectedForCompare={selectedForCompare}
+                            setSelectedForCompare={setSelectedForCompare}
+                            onViewRoadmap={(i) => { setActiveRoadmapCareer(i); setPage("roadmap"); }}
+                            onCompare={handleCompare}
+                            onRetake={startAssessment}
+                        />
                     )}
-                    {(page === "compare" || page === "roadmap") && (
-                        <button className="btn-ghost" style={{ fontSize: 13, padding: "7px 14px" }} onClick={() => setPage("results")}>← Back to Results</button>
+                    {page === "compare" && (
+                        <ComparePage
+                            loading={compareLoading}
+                            result={compareResult}
+                            error={error}
+                            onBack={() => setPage("results")}
+                        />
                     )}
-                    <button
-                        onClick={() => setDark(!dark)}
-                        style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: 8, padding: "6px 10px", cursor: "pointer", fontSize: 16, color: "var(--text)" }}
-                        title="Toggle dark mode"
-                    >
-                        {dark ? "☀️" : "🌙"}
-                    </button>
+                    {page === "roadmap" && results && (
+                        <RoadmapPage
+                            career={results.career_suggestions[activeRoadmapCareer || 0]}
+                            allCareers={results.career_suggestions}
+                            activeIdx={activeRoadmapCareer}
+                            setActiveIdx={setActiveRoadmapCareer}
+                            onBack={() => setPage("results")}
+                        />
+                    )}
                 </div>
-            </nav>
-
-            <div style={{ paddingTop: 60 }}>
-                {page === "landing" && <LandingPage onStart={startAssessment} onHistory={() => setPage("history")} historyCount={savedSessions.length} />}
-                {page === "history" && (
-                    <HistoryPage
-                        sessions={savedSessions}
-                        onLoad={loadSession}
-                        onDelete={deleteSession}
-                        onNewAssessment={startAssessment}
-                    />
-                )}
-                {page === "chat" && (
-                    <ChatPage
-                        messages={chatMessages}
-                        typing={aiTyping}
-                        inputVal={inputVal}
-                        setInputVal={setInputVal}
-                        onSend={handleSend}
-                        currentQ={currentQ}
-                        chatEndRef={chatEndRef}
-                        error={error}
-                        onRetry={handleRetry}
-                    />
-                )}
-                {page === "results" && results && (
-                    <ResultsPage
-                        results={results}
-                        selectedForCompare={selectedForCompare}
-                        setSelectedForCompare={setSelectedForCompare}
-                        onViewRoadmap={(i) => { setActiveRoadmapCareer(i); setPage("roadmap"); }}
-                        onCompare={handleCompare}
-                        onRetake={startAssessment}
-                    />
-                )}
-                {page === "compare" && (
-                    <ComparePage
-                        loading={compareLoading}
-                        result={compareResult}
-                        error={error}
-                        onBack={() => setPage("results")}
-                    />
-                )}
-                {page === "roadmap" && results && (
-                    <RoadmapPage
-                        career={results.career_suggestions[activeRoadmapCareer || 0]}
-                        allCareers={results.career_suggestions}
-                        activeIdx={activeRoadmapCareer}
-                        setActiveIdx={setActiveRoadmapCareer}
-                        onBack={() => setPage("results")}
-                    />
-                )}
-            </div>
+            </div>{/* end app-content */}
         </div>
     );
 }
@@ -571,9 +581,11 @@ Return ONLY valid JSON:
 // ─── Landing Page ─────────────────────────────────────────────────────────────
 function LandingPage({ onStart, onHistory, historyCount }) {
     return (
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "80px 24px 60px" }}>
+        <div className="landing-container" style={{ maxWidth: 1100, margin: "0 auto", padding: "80px 24px 60px" }}>
             {/* Hero */}
-            <div style={{ textAlign: "center", marginBottom: 80 }}>
+            <div className="landing-hero" style={{ textAlign: "center", marginBottom: 80 }}>
+
+                <div className="hero-badge animate-fade-up">AI-Powered Career Guidance for India</div>
 
                 <h1 className="font-display animate-fade-up animate-delay-1" style={{ fontSize: "clamp(42px, 6vw, 72px)", lineHeight: 1.1, fontWeight: 400, marginBottom: 24, color: "var(--text)" }}>
                     Discover the career<br /><em style={{ color: "var(--accent)", fontStyle: "italic" }}>you were born for</em>
@@ -581,7 +593,7 @@ function LandingPage({ onStart, onHistory, historyCount }) {
                 <p className="animate-fade-up animate-delay-2" style={{ fontSize: 18, color: "var(--text2)", maxWidth: 520, margin: "0 auto 40px", lineHeight: 1.6 }}>
                     A 12-question AI assessment that deeply maps your education, skills, interests, and aspirations to your ideal career path in India — with a full roadmap to get there.
                 </p>
-                <div className="animate-fade-up animate-delay-3" style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
+                <div className="animate-fade-up animate-delay-3 cta-group" style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
                     <button className="btn-primary" style={{ fontSize: 16, padding: "14px 32px" }} onClick={onStart}>
                         Start Free Assessment →
                     </button>
@@ -597,14 +609,14 @@ function LandingPage({ onStart, onHistory, historyCount }) {
             </div>
 
             {/* Feature Cards */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20, marginBottom: 80 }}>
+            <div className="feature-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20, marginBottom: 80 }}>
                 {[
                     { icon: "◈", title: "Deep Assessment", desc: "12 detailed questions covering education, skills, values, location, and sector preferences for India" },
                     { icon: "◉", title: "Fit Score", desc: "Each career gets a personalised compatibility score based on your unique profile and Indian market data" },
                     { icon: "◆", title: "India-Centric", desc: "Covers government, corporate, startup, and emerging sectors with real Indian exams, companies, and salaries" },
                     { icon: "◎", title: "Full Roadmap", desc: "Step-by-step guide with Indian institutions, platforms, and certifications to launch your career" },
                 ].map((f, i) => (
-                    <div key={i} className={`card animate-fade-up animate-delay-${i + 1}`} style={{ padding: "28px 24px" }}>
+                    <div key={i} className={`card feature-card animate-fade-up animate-delay-${i + 1}`} style={{ padding: "28px 24px" }}>
                         <div style={{ fontSize: 24, marginBottom: 16, color: "var(--accent)" }}>{f.icon}</div>
                         <div style={{ fontWeight: 600, marginBottom: 8, fontSize: 15 }}>{f.title}</div>
                         <div style={{ color: "var(--text2)", fontSize: 14, lineHeight: 1.6 }}>{f.desc}</div>
@@ -641,11 +653,19 @@ function ChatPage({ messages, typing, inputVal, setInputVal, onSend, currentQ, c
     const progress = Math.min((currentQ / QUESTIONS.length) * 100, 100);
     const handleKey = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSend(); } };
     const allAnswered = currentQ >= QUESTIONS.length;
+    const textareaRef = useRef(null);
+
+    // Auto-focus the textarea whenever a new question appears or typing stops
+    useEffect(() => {
+        if (!typing && !allAnswered && textareaRef.current) {
+            textareaRef.current.focus();
+        }
+    }, [typing, currentQ, allAnswered, messages]);
 
     return (
-        <div style={{ maxWidth: 680, margin: "0 auto", padding: "32px 24px", display: "flex", flexDirection: "column", height: "calc(100vh - 60px)" }}>
+        <div className="chat-container" style={{ maxWidth: 680, margin: "0 auto", padding: "32px 24px", display: "flex", flexDirection: "column", height: "calc(100vh - 60px)" }}>
             {/* Progress */}
-            <div style={{ marginBottom: 24 }}>
+            <div className="chat-progress" style={{ marginBottom: 24 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 13, color: "var(--text3)" }}>
                     <span>Career Assessment</span>
                     <span>Question {Math.min(currentQ + 1, QUESTIONS.length)} of {QUESTIONS.length}</span>
@@ -689,14 +709,16 @@ function ChatPage({ messages, typing, inputVal, setInputVal, onSend, currentQ, c
             </div>
 
             {/* Input */}
-            <div style={{ background: "var(--bg2)", border: "1px solid var(--border2)", borderRadius: 14, padding: "12px 14px", display: "flex", gap: 10, alignItems: "flex-end" }}>
+            <div className="chat-input-container">
                 <textarea
+                    ref={textareaRef}
                     value={inputVal}
                     onChange={(e) => setInputVal(e.target.value)}
                     onKeyDown={handleKey}
                     placeholder={!allAnswered ? QUESTIONS[currentQ]?.placeholder : "Assessment complete..."}
                     disabled={typing || allAnswered}
                     rows={1}
+                    autoFocus
                     style={{
                         flex: 1, background: "none", border: "none", outline: "none", resize: "none",
                         font: "15px 'DM Sans', sans-serif", color: "var(--text)", lineHeight: 1.5,
@@ -731,7 +753,7 @@ function ResultsPage({ results, selectedForCompare, setSelectedForCompare, onVie
     };
 
     return (
-        <div style={{ maxWidth: 900, margin: "0 auto", padding: "40px 24px 80px" }}>
+        <div className="results-container" style={{ maxWidth: 900, margin: "0 auto", padding: "40px 24px 80px" }}>
             <div className="animate-fade-up results-header" style={{ marginBottom: 40 }}>
                 <div style={{ fontSize: 13, color: "var(--accent)", fontWeight: 500, marginBottom: 8 }}>✦ Analysis Complete</div>
                 <h2 className="font-display" style={{ fontSize: 36, fontWeight: 400, marginBottom: 12 }}>Your Career Matches</h2>
@@ -769,7 +791,7 @@ function ResultsPage({ results, selectedForCompare, setSelectedForCompare, onVie
             {/* Detail Cards */}
             {results.career_suggestions.map((c, i) => (
                 <div key={i} className={`card animate-fade-up animate-delay-${i + 2}`} style={{ marginBottom: 20, overflow: "hidden" }}>
-                    <div style={{ padding: "28px 28px 24px" }}>
+                    <div className="card-detail-inner" style={{ padding: "28px 28px 24px" }}>
                         <div style={{ display: "flex", alignItems: "flex-start", gap: 20, marginBottom: 20, flexWrap: "wrap" }}>
                             <ScoreRing score={c.fit_score} size={72} />
                             <div style={{ flex: 1, minWidth: 200 }}>
@@ -802,7 +824,7 @@ function ResultsPage({ results, selectedForCompare, setSelectedForCompare, onVie
                         </div>
 
                         {/* Salary Breakdown & Extras */}
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 16 }}>
+                        <div className="salary-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 16 }}>
                             {c.entry_salary && (
                                 <div style={{ background: "var(--bg3)", borderRadius: 8, padding: "10px 14px" }}>
                                     <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>Entry-Level</div>
@@ -825,7 +847,7 @@ function ResultsPage({ results, selectedForCompare, setSelectedForCompare, onVie
 
                         {/* Exam & Institutions */}
                         {(c.exam_required || c.top_indian_companies?.length > 0 || c.indian_institutions?.length > 0) && (
-                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 16 }}>
+                            <div className="info-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 16 }}>
                                 {c.exam_required && (
                                     <div>
                                         <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>Exam / Certification</div>
@@ -926,7 +948,7 @@ function ComparePage({ loading, result, error, onBack }) {
     const { careers, summary, dimensions, a_pros, a_cons, b_pros, b_cons, recommendation } = result;
 
     return (
-        <div style={{ maxWidth: 900, margin: "0 auto", padding: "40px 24px 80px" }}>
+        <div className="compare-container" style={{ maxWidth: 900, margin: "0 auto", padding: "40px 24px 80px" }}>
             <div className="animate-fade-up" style={{ marginBottom: 32 }}>
                 <div style={{ fontSize: 13, color: "var(--accent)", fontWeight: 500, marginBottom: 8 }}>◈ Career Comparison</div>
                 <h2 className="font-display" style={{ fontSize: 36, fontWeight: 400, marginBottom: 12 }}>
@@ -1010,7 +1032,7 @@ function ComparePage({ loading, result, error, onBack }) {
 function RoadmapPage({ career, allCareers, activeIdx, setActiveIdx, onBack }) {
     if (!career) return null;
     return (
-        <div style={{ maxWidth: 760, margin: "0 auto", padding: "40px 24px 80px" }}>
+        <div className="roadmap-container" style={{ maxWidth: 760, margin: "0 auto", padding: "40px 24px 80px" }}>
             <div className="animate-fade-up" style={{ marginBottom: 32 }}>
                 <div style={{ fontSize: 13, color: "var(--accent)", fontWeight: 500, marginBottom: 8 }}>◆ Learning Roadmap</div>
                 <h2 className="font-display" style={{ fontSize: 36, fontWeight: 400, marginBottom: 8 }}>{career.career}</h2>
@@ -1066,7 +1088,7 @@ function RoadmapPage({ career, allCareers, activeIdx, setActiveIdx, onBack }) {
                         {i < career.roadmap.length - 1 && (
                             <div style={{ position: "absolute", left: 19, top: 40, bottom: -8, width: 2, background: "linear-gradient(to bottom, var(--accent), var(--border))" }} />
                         )}
-                        <div style={{
+                        <div className="timeline-step-circle" style={{
                             position: "absolute", left: 0, top: 0,
                             width: 38, height: 38, borderRadius: "50%",
                             background: i === 0 ? "var(--accent)" : "var(--bg3)",
@@ -1124,7 +1146,7 @@ function HistoryPage({ sessions, onLoad, onDelete, onNewAssessment }) {
                 {sessions.map((session, i) => (
                     <div
                         key={session.id}
-                        className={`card animate-fade-up animate-delay-${Math.min(i + 1, 5)}`}
+                        className={`card history-card animate-fade-up animate-delay-${Math.min(i + 1, 5)}`}
                         style={{ padding: "24px", display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}
                     >
                         <ScoreRing score={session.topScore} size={56} />
@@ -1137,7 +1159,7 @@ function HistoryPage({ sessions, onLoad, onDelete, onNewAssessment }) {
                                 ))}
                             </div>
                         </div>
-                        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                        <div className="history-card-actions" style={{ display: "flex", gap: 8, flexShrink: 0 }}>
                             <button className="btn-primary" style={{ fontSize: 13, padding: "8px 18px" }} onClick={() => onLoad(session)}>
                                 View Results
                             </button>
