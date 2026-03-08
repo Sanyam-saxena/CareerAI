@@ -13,7 +13,7 @@ async function callGemini(prompt) {
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: {
                 temperature: 0.7,
-                maxOutputTokens: 8192,
+                maxOutputTokens: 16384,
                 responseMimeType: "application/json",
             },
         }),
@@ -29,40 +29,76 @@ async function callGemini(prompt) {
 // ─── Assessment Questions ─────────────────────────────────────────────────────
 const QUESTIONS = [
     {
+        id: "education",
+        text: "What is your current education level and field of study? (e.g., 12th Science PCM, B.Tech CSE 2nd year, MBA Finance, BA English graduate, Diploma in Mechanical)",
+        placeholder: "I am currently studying / have completed...",
+        icon: "🎓",
+    },
+    {
         id: "interests",
-        text: "What subjects or topics genuinely excite you? (e.g., technology, art, science, business, people)",
-        placeholder: "I'm passionate about...",
+        text: "What subjects, activities, or topics genuinely excite you? Think about what you'd do even if you weren't paid. (e.g., coding, teaching, debating, designing, researching, writing, sports, music, social work)",
+        placeholder: "I'm genuinely passionate about...",
         icon: "✦",
     },
     {
         id: "skills",
-        text: "What are your strongest skills? What do people often come to you for help with?",
-        placeholder: "My strengths include...",
+        text: "What are your strongest soft skills? What do friends, family, or teachers often praise you for? (e.g., leadership, communication, problem-solving, creativity, empathy, organisation)",
+        placeholder: "People often say I'm good at...",
         icon: "◈",
     },
     {
+        id: "technical_skills",
+        text: "What technical or domain-specific skills do you have? (e.g., Python, Excel, Photoshop, video editing, lab work, accounting, public speaking, CAD, writing, data analysis)",
+        placeholder: "My technical skills include...",
+        icon: "⚙",
+    },
+    {
         id: "work_style",
-        text: "How do you prefer to work? (Solo vs team, creative vs structured, fast-paced vs deliberate)",
+        text: "How do you prefer to work? Describe your ideal work environment. (Solo vs team, creative vs structured, fast-paced vs methodical, fieldwork vs desk job, fixed hours vs flexible)",
         placeholder: "I work best when...",
         icon: "◉",
     },
     {
         id: "people_data_systems",
-        text: "Do you prefer working with people, data/numbers, or building systems/products?",
-        placeholder: "I enjoy working with...",
+        text: "Do you enjoy working more with people (teaching, counselling, sales), data/numbers (analysis, research, finance), or building things/systems (engineering, coding, design)?",
+        placeholder: "I enjoy working most with...",
         icon: "◎",
     },
     {
         id: "values",
-        text: "What matters most to you in a career? (Impact, income, flexibility, creativity, stability...)",
-        placeholder: "What I value most is...",
+        text: "What matters most to you in a career? Rank or describe your top priorities. (Job security, high salary, work-life balance, social impact, creativity, government job stability, entrepreneurship, foreign opportunities)",
+        placeholder: "What I value most in my career is...",
         icon: "◆",
     },
     {
+        id: "location",
+        text: "Where would you prefer to work? (Metro cities like Mumbai/Delhi/Bangalore, Tier-2 cities like Jaipur/Pune/Lucknow, your hometown, remote/WFH, open to anywhere, abroad)",
+        placeholder: "I'd prefer to work in...",
+        icon: "📍",
+    },
+    {
+        id: "sector_pref",
+        text: "Which sector appeals to you most? (Government/PSU, private corporate, startups, freelancing/self-employed, NGO/social sector, academia/research, or open to any)",
+        placeholder: "I'm most drawn towards...",
+        icon: "🏢",
+    },
+    {
+        id: "budget_timeline",
+        text: "How much time and money are you willing to invest in upskilling or further education? (e.g., 6 months self-study, 2-year master's degree, online courses only, ready for competitive exam prep for 1-2 years)",
+        placeholder: "I can invest approximately...",
+        icon: "⏳",
+    },
+    {
         id: "weaknesses",
-        text: "What are your weaknesses or areas you want to grow? Be honest — it helps us guide you better.",
+        text: "What are your weaknesses or areas you want to improve? Be honest — it helps us guide you better. (e.g., public speaking, maths, time management, confidence, English fluency, technical skills)",
         placeholder: "I struggle with...",
         icon: "◇",
+    },
+    {
+        id: "aspirations",
+        text: "Where do you see yourself in 5–10 years? What does your dream career or life look like? (e.g., leading a tech team, running my own business, working in the IAS, settled abroad, teaching at a university)",
+        placeholder: "In 5-10 years, I see myself...",
+        icon: "🚀",
     },
 ];
 
@@ -145,7 +181,7 @@ export default function App() {
         setError(null);
         setTimeout(() => {
             addAiMessage(
-                "Welcome! I'm your AI Career Guide. I'll ask you 6 questions to understand your strengths, passions, and work style — then match you with your ideal career paths.\n\nLet's begin! 🌟"
+                "Welcome! I'm your AI Career Guide. I'll ask you 12 detailed questions to deeply understand your education, strengths, passions, preferences, and aspirations — then match you with your ideal career paths in the Indian job market.\n\nLet's begin! 🌟"
             );
             setTimeout(() => addAiMessage(QUESTIONS[0].text), 800);
         }, 400);
@@ -220,17 +256,92 @@ export default function App() {
     };
 
     const buildAnalysisPrompt = (answers) => `
-You are an expert career counselor specializing in the Indian job market. Based on the user's responses, provide a comprehensive career analysis tailored to career opportunities in India.
+You are a world-class career counselor who specialises EXCLUSIVELY in the Indian job market. You have deep expertise in:
 
-Consider the Indian context: Indian education system, Indian companies and startups, Indian government jobs, Indian salary ranges, Indian platforms (NPTEL, SWAYAM, IITs, NITs, UPSC, etc.), and the Indian job market landscape.
+**GOVERNMENT & PUBLIC SECTOR:**
+- UPSC Civil Services (IAS, IPS, IFS, IRS), SSC CGL, SSC CHSL, State PSC exams
+- Banking: IBPS PO/Clerk, SBI PO, RBI Grade B, NABARD
+- Railways: RRB NTPC, RRB JE, RRB Group D
+- Defence: NDA, CDS, AFCAT, Indian Navy, Coast Guard
+- PSUs: ONGC, BHEL, NTPC, ISRO, DRDO, BARC, HAL, BEL
+- Teaching: UGC NET, CTET, KVS, NVS, State TET
+
+**CORPORATE & IT:**
+- IT Services: TCS, Infosys, Wipro, HCL, Tech Mahindra, Cognizant
+- Product companies: Google India, Microsoft India, Amazon India, Flipkart, Razorpay, Zerodha, PhonePe, CRED
+- Consulting: McKinsey India, BCG India, Bain India, Deloitte India, EY, KPMG, PwC
+- Finance: Goldman Sachs India, JP Morgan India, HDFC, ICICI, Kotak
+- FMCG/Consumer: HUL, P&G India, ITC, Nestlé India, Asian Paints
+
+**PROFESSIONAL EXAMINATIONS:**
+- Engineering: JEE Main/Advanced, GATE, ESE
+- Medical: NEET UG, NEET PG, AIIMS, FMGE
+- Law: CLAT, AILET, LSAT India, Bar Council exam
+- Commerce: CA (ICAI), CS (ICSI), CMA (ICMAI), CFA, ACCA
+- Design: NID DAT, NIFT, UCEED, CEED
+- Management: CAT, XAT, GMAT, NMAT, SNAP for IIMs/ISB/XLRI/FMS/MDI
+
+**CREATIVE & MEDIA:**
+- Film/TV: FTII, Whistling Woods, Satyajit Ray Institute
+- Journalism: IIMC, ACJ, Xavier's, Symbiosis
+- Digital content creation, YouTube, podcasting
+- Graphic design, UI/UX (Indian startups hiring heavily)
+
+**EMERGING SECTORS IN INDIA:**
+- AI/ML, Data Science (Indian AI market growing 30%+ annually)
+- Cybersecurity (India's CERT-In, NASSCOM estimates)
+- Electric Vehicles (Tata Motors EV, Ather, Ola Electric)
+- Space tech (ISRO, Skyroot, Agnikul, Pixxel)
+- Fintech (UPI ecosystem, RBI sandbox)
+- Agritech, Edtech, Healthtech startups
+- Semiconductor (India Semiconductor Mission)
+
+**LEARNING PLATFORMS & INSTITUTIONS:**
+- Government: NPTEL, SWAYAM, DigiLocker, Skill India (PMKVY)
+- Premier: IITs, IIMs, NITs, AIIMS, NLUs, IISc, TIFR, ISI
+- Online: Coursera, Udemy, Scaler, Coding Ninjas, UpGrad, Great Learning, BYJU's, Unacademy
+- Certifications: AWS, Google Cloud, Azure, NASSCOM FutureSkills, NISM (securities markets)
+
+**SALARY BENCHMARKS (2024-25 realistic Indian market):**
+- Entry-level IT: ₹3-8 LPA | Mid: ₹10-25 LPA | Senior: ₹30-60+ LPA
+- Government (Group A): ₹6-10 LPA entry (7th CPC + DA) | Senior: ₹15-25 LPA + perks
+- Banking PO: ₹5-8 LPA entry | Branch Manager: ₹12-18 LPA
+- CA: ₹7-12 LPA entry | Partner: ₹30-100+ LPA
+- Medical (MBBS): ₹5-12 LPA entry | Specialist: ₹20-80+ LPA
+- Startup: ₹4-15 LPA + equity | Senior: ₹25-60+ LPA + ESOP
+- Data Science: ₹6-15 LPA entry | Senior: ₹25-50+ LPA
+- Design (UI/UX): ₹4-10 LPA entry | Senior: ₹20-40+ LPA
+- Content/Media: ₹3-8 LPA entry | Senior/Independent: ₹15-40+ LPA
+
+---
+
+Based on the following DETAILED user profile, provide a highly personalized career analysis:
 
 User Profile:
-- Interests: ${answers.interests || "Not provided"}
-- Skills: ${answers.skills || "Not provided"}
-- Work Style: ${answers.work_style || "Not provided"}
-- Preference (people/data/systems): ${answers.people_data_systems || "Not provided"}
-- Career Values: ${answers.values || "Not provided"}
+- Education: ${answers.education || "Not provided"}
+- Interests & Passions: ${answers.interests || "Not provided"}
+- Soft Skills: ${answers.skills || "Not provided"}
+- Technical Skills: ${answers.technical_skills || "Not provided"}
+- Work Style Preference: ${answers.work_style || "Not provided"}
+- People / Data / Systems Preference: ${answers.people_data_systems || "Not provided"}
+- Career Values & Priorities: ${answers.values || "Not provided"}
+- Location Preference: ${answers.location || "Not provided"}
+- Sector Preference: ${answers.sector_pref || "Not provided"}
+- Upskilling Budget & Timeline: ${answers.budget_timeline || "Not provided"}
 - Weaknesses: ${answers.weaknesses || "Not provided"}
+- 5-10 Year Aspirations: ${answers.aspirations || "Not provided"}
+
+---
+
+ANALYSIS RULES:
+1. Each career MUST be realistic given the user's education, location preference, and sector preference.
+2. If the user prefers government jobs, suggest relevant government career paths with specific exams.
+3. If the user prefers startups, suggest roles in India's startup ecosystem.
+4. Reference SPECIFIC Indian companies, exams, institutions, and platforms in roadmaps.
+5. Salary ranges MUST be realistic 2024-25 Indian market rates in ₹ LPA.
+6. Roadmap steps should have SPECIFIC timelines and mention Indian-relevant resources.
+7. Consider the user's upskilling budget and timeline when suggesting roadmaps.
+8. Factor in the user's location preference (metro vs tier-2 vs remote).
 
 Return ONLY valid JSON (no markdown, no explanation outside JSON) in this exact format:
 {
@@ -238,24 +349,32 @@ Return ONLY valid JSON (no markdown, no explanation outside JSON) in this exact 
     {
       "career": "Career Title",
       "fit_score": 85,
-      "reasoning": "Detailed 2-3 sentence explanation of why this career fits this specific user's profile, referencing Indian market context",
-      "required_skills": ["Skill1", "Skill2", "Skill3", "Skill4", "Skill5"],
+      "reasoning": "Detailed 3-4 sentence explanation of why this career fits this user's specific profile, education, and aspirations in the Indian context",
+      "required_skills": ["Skill1", "Skill2", "Skill3", "Skill4", "Skill5", "Skill6"],
       "skill_gap": ["Missing skill 1", "Missing skill 2", "Missing skill 3"],
+      "exam_required": "Specific Indian exam or certification needed (e.g., GATE, CA Final, UPSC CSE, NEET PG) or 'None — skill-based hiring' if no exam",
+      "top_indian_companies": ["Company1", "Company2", "Company3", "Company4", "Company5"],
+      "indian_institutions": ["Best institution/platform 1 for this career", "Institution 2", "Institution 3"],
       "roadmap": [
-        "Step 1: Specific action with timeline (mention Indian institutions, certifications, or platforms where relevant)",
+        "Step 1: Specific action with timeline (e.g., 'Months 1-3: Complete Python + SQL fundamentals via NPTEL/Coursera')",
         "Step 2: Specific action with timeline",
         "Step 3: Specific action with timeline",
         "Step 4: Specific action with timeline",
-        "Step 5: Specific action with timeline"
+        "Step 5: Specific action with timeline",
+        "Step 6: Specific action with timeline",
+        "Step 7: Specific action with timeline"
       ],
-      "avg_salary": "₹X LPA - ₹Y LPA",
-      "growth_outlook": "High/Medium/Low",
-      "personality_fit": "Brief personality archetype description"
+      "entry_salary": "₹X-Y LPA (0-2 years experience)",
+      "mid_salary": "₹X-Y LPA (3-7 years experience)",
+      "senior_salary": "₹X-Y LPA (8+ years experience)",
+      "avg_salary": "₹X LPA - ₹Y LPA (overall range)",
+      "growth_outlook": "High/Medium/Low — with 1-line reason specific to India",
+      "personality_fit": "2-sentence personality archetype description matching the user"
     }
   ]
 }
 
-Provide exactly 3 career suggestions ranked by fit score (highest first). Be specific and personalized to THIS user's actual answers. All salaries must be in Indian Rupees (₹) as LPA (Lakhs Per Annum).`;
+Provide exactly 5 career suggestions ranked by fit score (highest first). Be deeply personalized to THIS user's actual answers — do not give generic suggestions. All salaries must be in Indian Rupees (₹) as LPA (Lakhs Per Annum).`;
 
     const extractJSON = (text) => {
         // Strip markdown code fences if present
@@ -283,32 +402,41 @@ Provide exactly 3 career suggestions ranked by fit score (highest first). Be spe
         setPage("compare");
         try {
             const [c1, c2] = selectedForCompare.map((i) => results.career_suggestions[i]);
-            const prompt = `Compare these two careers for an Indian user who answered:
-Interests: ${userAnswers.interests}
-Skills: ${userAnswers.skills}
-Values: ${userAnswers.values}
+            const prompt = `You are an expert Indian career counselor. Compare these two careers for an Indian user.
 
-Career A: ${c1.career}
-Career B: ${c2.career}
+User Profile:
+- Education: ${userAnswers.education || "Not provided"}
+- Interests: ${userAnswers.interests || "Not provided"}
+- Skills: ${userAnswers.skills || "Not provided"}
+- Technical Skills: ${userAnswers.technical_skills || "Not provided"}
+- Values: ${userAnswers.values || "Not provided"}
+- Location Preference: ${userAnswers.location || "Not provided"}
+- Sector Preference: ${userAnswers.sector_pref || "Not provided"}
+- Aspirations: ${userAnswers.aspirations || "Not provided"}
 
-Context: Indian job market. All insights should be relevant to India (Indian salaries, Indian companies, Indian work culture).
+Career A: ${c1.career} (Fit Score: ${c1.fit_score}%)
+Career B: ${c2.career} (Fit Score: ${c2.fit_score}%)
+
+Context: Indian job market 2024-25. All insights MUST be specific to India — Indian salaries in ₹ LPA, Indian companies, Indian work culture, Indian exam requirements, Indian city/tier considerations.
 
 Return ONLY valid JSON:
 {
   "comparison": {
-    "summary": "2-sentence executive summary of key differences in the Indian context",
+    "summary": "3-sentence executive summary of key differences in the Indian context, referencing specific Indian market realities",
     "dimensions": [
-      {"label": "Work-Life Balance", "a_score": 75, "b_score": 65, "note": "brief note"},
-      {"label": "Earning Potential", "a_score": 80, "b_score": 90, "note": "brief note in ₹ LPA"},
-      {"label": "Creative Freedom", "a_score": 85, "b_score": 55, "note": "brief note"},
-      {"label": "Job Security", "a_score": 70, "b_score": 85, "note": "brief note"},
-      {"label": "Learning Curve", "a_score": 75, "b_score": 70, "note": "brief note"}
+      {"label": "Work-Life Balance", "a_score": 75, "b_score": 65, "note": "India-specific note (e.g., IT service companies vs govt 9-5)"},
+      {"label": "Earning Potential (₹)", "a_score": 80, "b_score": 90, "note": "Compare realistic ₹ LPA ranges for both in India"},
+      {"label": "Job Security in India", "a_score": 70, "b_score": 85, "note": "Consider govt permanence vs private layoffs vs startup risk"},
+      {"label": "Career Growth", "a_score": 85, "b_score": 75, "note": "Growth trajectory in Indian market"},
+      {"label": "Creative Freedom", "a_score": 85, "b_score": 55, "note": "Role autonomy in typical Indian workplace"},
+      {"label": "Availability in Tier-2/3 Cities", "a_score": 50, "b_score": 80, "note": "Is this career metro-only or available pan-India?"},
+      {"label": "Social Prestige in India", "a_score": 70, "b_score": 90, "note": "Cultural perception in Indian society"}
     ],
-    "a_pros": ["Pro 1", "Pro 2", "Pro 3"],
-    "a_cons": ["Con 1", "Con 2"],
-    "b_pros": ["Pro 1", "Pro 2", "Pro 3"],
-    "b_cons": ["Con 1", "Con 2"],
-    "recommendation": "One sentence: which is better for THIS user in India and why"
+    "a_pros": ["India-specific Pro 1", "Pro 2", "Pro 3", "Pro 4"],
+    "a_cons": ["India-specific Con 1", "Con 2", "Con 3"],
+    "b_pros": ["India-specific Pro 1", "Pro 2", "Pro 3", "Pro 4"],
+    "b_cons": ["India-specific Con 1", "Con 2", "Con 3"],
+    "recommendation": "2-3 sentences: which is better for THIS specific user in India and why, referencing their education, location pref, and values"
   }
 }`;
             const raw = await callGemini(prompt);
@@ -451,7 +579,7 @@ function LandingPage({ onStart, onHistory, historyCount }) {
                     Discover the career<br /><em style={{ color: "var(--accent)", fontStyle: "italic" }}>you were born for</em>
                 </h1>
                 <p className="animate-fade-up animate-delay-2" style={{ fontSize: 18, color: "var(--text2)", maxWidth: 520, margin: "0 auto 40px", lineHeight: 1.6 }}>
-                    A 6-question AI assessment that maps your interests, skills, and personality to your ideal career path — with a full roadmap to get there.
+                    A 12-question AI assessment that deeply maps your education, skills, interests, and aspirations to your ideal career path in India — with a full roadmap to get there.
                 </p>
                 <div className="animate-fade-up animate-delay-3" style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
                     <button className="btn-primary" style={{ fontSize: 16, padding: "14px 32px" }} onClick={onStart}>
@@ -463,7 +591,7 @@ function LandingPage({ onStart, onHistory, historyCount }) {
                         </button>
                     )}
                     <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "14px 20px", color: "var(--text3)", fontSize: 14 }}>
-                        <span>⏱</span> Takes ~3 minutes
+                        <span>⏱</span> Takes ~5 minutes
                     </div>
                 </div>
             </div>
@@ -471,10 +599,10 @@ function LandingPage({ onStart, onHistory, historyCount }) {
             {/* Feature Cards */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20, marginBottom: 80 }}>
                 {[
-                    { icon: "◈", title: "Career Matching", desc: "AI analyzes your profile against hundreds of career paths to find your best fits" },
-                    { icon: "◉", title: "Fit Score", desc: "Each career gets a personalised compatibility score based on your unique profile" },
-                    { icon: "◆", title: "Skill Gap Analysis", desc: "Know exactly what skills you're missing and what you already have" },
-                    { icon: "◎", title: "Learning Roadmap", desc: "Step-by-step guide to transition into your new career, with timelines" },
+                    { icon: "◈", title: "Deep Assessment", desc: "12 detailed questions covering education, skills, values, location, and sector preferences for India" },
+                    { icon: "◉", title: "Fit Score", desc: "Each career gets a personalised compatibility score based on your unique profile and Indian market data" },
+                    { icon: "◆", title: "India-Centric", desc: "Covers government, corporate, startup, and emerging sectors with real Indian exams, companies, and salaries" },
+                    { icon: "◎", title: "Full Roadmap", desc: "Step-by-step guide with Indian institutions, platforms, and certifications to launch your career" },
                 ].map((f, i) => (
                     <div key={i} className={`card animate-fade-up animate-delay-${i + 1}`} style={{ padding: "28px 24px" }}>
                         <div style={{ fontSize: 24, marginBottom: 16, color: "var(--accent)" }}>{f.icon}</div>
@@ -488,7 +616,7 @@ function LandingPage({ onStart, onHistory, historyCount }) {
             <div style={{ textAlign: "center", marginBottom: 60 }}>
                 <h2 className="font-display" style={{ fontSize: 32, fontWeight: 400, marginBottom: 40 }}>How it works</h2>
                 <div className="how-it-works" style={{ display: "flex", justifyContent: "center", gap: 40, flexWrap: "wrap" }}>
-                    {["Answer 6 questions", "AI analyses your profile", "Get 3 career matches", "Explore your roadmap"].map((step, i) => (
+                    {["Answer 12 questions", "AI analyses your profile", "Get 5 career matches", "Explore your roadmap"].map((step, i) => (
                         <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, maxWidth: 140 }}>
                             <div style={{ width: 44, height: 44, borderRadius: "50%", background: i === 0 ? "var(--accent)" : "var(--bg3)", border: "2px solid var(--border2)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 600, fontSize: 16, color: i === 0 ? "white" : "var(--text2)" }}>
                                 {i + 1}
@@ -607,11 +735,11 @@ function ResultsPage({ results, selectedForCompare, setSelectedForCompare, onVie
             <div className="animate-fade-up results-header" style={{ marginBottom: 40 }}>
                 <div style={{ fontSize: 13, color: "var(--accent)", fontWeight: 500, marginBottom: 8 }}>✦ Analysis Complete</div>
                 <h2 className="font-display" style={{ fontSize: 36, fontWeight: 400, marginBottom: 12 }}>Your Career Matches</h2>
-                <p style={{ color: "var(--text2)", fontSize: 15 }}>Based on your profile, here are your top 3 career recommendations. Select 2 to compare.</p>
+                <p style={{ color: "var(--text2)", fontSize: 15 }}>Based on your detailed profile, here are your top 5 career recommendations for the Indian job market. Select 2 to compare.</p>
             </div>
 
             {/* Summary Row */}
-            <div className="results-summary-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 40 }}>
+            <div className="results-summary-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, marginBottom: 40 }}>
                 {results.career_suggestions.map((c, i) => (
                     <button
                         key={i}
@@ -648,9 +776,12 @@ function ResultsPage({ results, selectedForCompare, setSelectedForCompare, onVie
                                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6, flexWrap: "wrap" }}>
                                     <h3 style={{ fontSize: 22, fontWeight: 600 }}>{c.career}</h3>
                                     <span className={`tag ${c.fit_score >= 80 ? "tag-green" : "tag-accent"}`}>{c.fit_score >= 80 ? "Strong Match" : "Good Match"}</span>
-                                    {c.growth_outlook && <span className="tag tag-blue">📈 {c.growth_outlook} Growth</span>}
+                                    {c.growth_outlook && <span className="tag tag-blue">📈 {c.growth_outlook}</span>}
                                 </div>
-                                <div style={{ fontSize: 14, color: "var(--text2)", marginBottom: 6 }}>{c.avg_salary}</div>
+                                <div style={{ fontSize: 14, color: "var(--text2)", marginBottom: 4 }}>{c.avg_salary}</div>
+                                {c.exam_required && c.exam_required !== "None" && c.exam_required !== "None — skill-based hiring" && (
+                                    <div style={{ fontSize: 12, color: "var(--blue)", marginBottom: 4 }}>📝 {c.exam_required}</div>
+                                )}
                                 <div style={{ fontSize: 13, color: "var(--text3)", fontStyle: "italic" }}>{c.personality_fit}</div>
                             </div>
                             <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
@@ -666,9 +797,59 @@ function ResultsPage({ results, selectedForCompare, setSelectedForCompare, onVie
                         </div>
 
                         {/* Reasoning */}
-                        <div style={{ background: "var(--bg3)", borderRadius: 10, padding: "14px 16px", marginBottom: 20, fontSize: 14, lineHeight: 1.7, color: "var(--text2)" }}>
+                        <div style={{ background: "var(--bg3)", borderRadius: 10, padding: "14px 16px", marginBottom: 16, fontSize: 14, lineHeight: 1.7, color: "var(--text2)" }}>
                             <span style={{ fontWeight: 600, color: "var(--text)" }}>Why this fits you: </span>{c.reasoning}
                         </div>
+
+                        {/* Salary Breakdown & Extras */}
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 16 }}>
+                            {c.entry_salary && (
+                                <div style={{ background: "var(--bg3)", borderRadius: 8, padding: "10px 14px" }}>
+                                    <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>Entry-Level</div>
+                                    <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text)" }}>{c.entry_salary}</div>
+                                </div>
+                            )}
+                            {c.mid_salary && (
+                                <div style={{ background: "var(--bg3)", borderRadius: 8, padding: "10px 14px" }}>
+                                    <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>Mid-Level</div>
+                                    <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text)" }}>{c.mid_salary}</div>
+                                </div>
+                            )}
+                            {c.senior_salary && (
+                                <div style={{ background: "var(--bg3)", borderRadius: 8, padding: "10px 14px" }}>
+                                    <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 4 }}>Senior-Level</div>
+                                    <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text)" }}>{c.senior_salary}</div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Exam & Institutions */}
+                        {(c.exam_required || c.top_indian_companies?.length > 0 || c.indian_institutions?.length > 0) && (
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 16 }}>
+                                {c.exam_required && (
+                                    <div>
+                                        <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>Exam / Certification</div>
+                                        <span className="tag tag-blue">{c.exam_required}</span>
+                                    </div>
+                                )}
+                                {c.top_indian_companies?.length > 0 && (
+                                    <div>
+                                        <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>Top Indian Companies</div>
+                                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                                            {c.top_indian_companies.map((co, j) => <span key={j} className="tag">{co}</span>)}
+                                        </div>
+                                    </div>
+                                )}
+                                {c.indian_institutions?.length > 0 && (
+                                    <div>
+                                        <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text3)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>Recommended Institutions</div>
+                                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                                            {c.indian_institutions.map((inst, j) => <span key={j} className="tag tag-accent">{inst}</span>)}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                         {/* Skills Row */}
                         <div className="skills-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
