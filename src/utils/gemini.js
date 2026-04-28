@@ -1,16 +1,25 @@
-// Gemini API — uses Cloud Function proxy when available, direct API as fallback
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+// Gemini API — Secure architecture:
+// Production: Cloud Function proxy (/api/gemini) — API key on server only
+// Fallback: Runtime-injected key (never bundled by Vite)
+// Dev only: .env file for local development
 
 const MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"];
 
-// Rate limiter: max 8 calls per minute (client-side safety net)
 const callTimestamps = [];
 const RATE_LIMIT = 8;
 const RATE_WINDOW = 60000;
 const MAX_RETRIES = 3;
 const BASE_DELAY = 2000;
 
-// Try Cloud Function proxy first; fall back to direct API if unavailable
+// Get API key at runtime (never compiled into bundle)
+function getRuntimeKey() {
+    // 1. Check for runtime config injected via window (set in index.html or server)
+    if (window.__CAREERAI_CONFIG__?.apiKey) return window.__CAREERAI_CONFIG__.apiKey;
+    // 2. Dev only: Vite env variable (only works on localhost)
+    if (import.meta.env.DEV && import.meta.env.VITE_GEMINI_API_KEY) return import.meta.env.VITE_GEMINI_API_KEY;
+    return null;
+}
+
 async function callModel(prompt, model) {
     // Attempt 1: Cloud Function proxy (API key stays on server)
     try {
@@ -23,7 +32,6 @@ async function callModel(prompt, model) {
             const data = await proxyRes.json();
             return data.text || "";
         }
-        // If proxy returns 404 (not deployed), fall through to direct API
         if (proxyRes.status !== 404) {
             const err = await proxyRes.json().catch(() => ({}));
             const msg = err?.error?.message || err?.error || `HTTP ${proxyRes.status}`;
@@ -32,13 +40,13 @@ async function callModel(prompt, model) {
             throw e;
         }
     } catch (e) {
-        // Network error or 404 = proxy not deployed, fall through
         if (e.status && e.status !== 404) throw e;
     }
 
-    // Attempt 2: Direct API call (fallback when Cloud Function is not deployed)
-    if (!GEMINI_API_KEY) throw new Error("API configuration missing. Please contact the administrator.");
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+    // Attempt 2: Direct API with runtime key (NOT compiled into bundle)
+    const apiKey = getRuntimeKey();
+    if (!apiKey) throw new Error("API not configured. Please deploy the Cloud Function or set up runtime config.");
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
     const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
